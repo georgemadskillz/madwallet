@@ -1,9 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc madwallet top level supervisor.
+%% @doc mw_server top level supervisor.
 %% @end
 %%%-------------------------------------------------------------------
 
--module(madwallet_sup).
+-module(mw_server_sup).
 
 -behaviour(supervisor).
 
@@ -29,7 +29,12 @@ init([]) ->
     SupFlags = #{strategy => one_for_all,
                  intensity => 0,
                  period => 1},
-    ChildSpecs = [],
+    ChildSpecs = [
+        #{
+            id => main,
+            start => {mw_server, start_link, []}
+        }
+    ],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions

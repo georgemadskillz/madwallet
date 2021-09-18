@@ -1,8 +1,8 @@
-{application, madwallet,
+{application, mw_server,
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {madwallet_app, []}},
+  {mod, {mw_server_app, []}},
   {applications,
    [kernel,
     stdlib

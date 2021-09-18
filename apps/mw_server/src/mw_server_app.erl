@@ -1,16 +1,16 @@
 %%%-------------------------------------------------------------------
-%% @doc madwallet public API
+%% @doc mw_server public API
 %% @end
 %%%-------------------------------------------------------------------
 
--module(madwallet_app).
+-module(mw_server_app).
 
 -behaviour(application).
 
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-    madwallet_sup:start_link().
+    mw_server_sup:start_link().
 
 stop(_State) ->
     ok.
