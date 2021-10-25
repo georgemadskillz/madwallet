@@ -1,15 +1,19 @@
-{application, mw_server,
+{application, madwallet,
  [{description, "An OTP application"},
   {vsn, "0.1.0"},
   {registered, []},
-  {mod, {mw_server_app, []}},
+  {mod, {madwallet_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    cowboy
    ]},
   {env,[]},
-  {modules, []},
-
+  {modules,
+    [madwallet_app,
+    madwallet_sup,
+    madwallet_server
+    ]},
   {licenses, ["Apache 2.0"]},
   {links, []}
  ]}.

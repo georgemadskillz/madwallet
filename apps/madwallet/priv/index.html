@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8"/>
+	<title>Mad wallet</title>
+</head>
+
+<body>
+
+<header >
+	<h1>Mad wallet</h1>
+	<div id="status"></div>
+</header>
+
+<main>
+	<div>
+		<table>
+		<tr>
+			<td><button id="connectButton" type="button" onclick="toggle_connection()">Connect</button></td>
+			<td></td>
+		</tr>
+		<tr>
+			<p id="connectStatus" style="color: red;">Not connected..</p>
+		</tr>
+		<tr>
+			<td>Send to server</td>
+			<td><input id="inputDebug" type='text' value=""></input></td>
+			<td>
+				<button id="sendMessageButton" type="button" onclick="sendMessage();">Send</button>
+			</td>
+		</tr>
+		</table>
+
+	</div>
+</main>
+
+<script type="text/javascript">
+
+var websocket
+var loginFlag = false
+
+var statusLine = document.getElementById("connectStatus")
+var connectButton = document.getElementById("connectButton")
+var inputDebug = document.getElementById("inputDebug")
+var debugMessage = document.getElementById("sendMessageButton")
+
+function connect()
+{
+	wsHost = "ws://localhost:8001/websocket"
+	websocket = new WebSocket(wsHost);
+	websocket.onopen = function(evt) { onOpen(evt) };
+	websocket.onclose = function(evt) { onClose(evt) };
+	websocket.onmessage = function(evt) { onMessage(evt) };
+	websocket.onerror = function(evt) { onError(evt) };
+
+	setInterval(() => {
+		if (!websocket) return;
+		if (websocket.readyState !== 1) return;
+		console.log("%csend ping..", "color: brown;");
+		websocket.send("msg&ping")
+	}, 5000);
+};
+
+function disconnect() {
+	websocket.close();
+};
+
+function toggle_connection(){
+	if (websocket && websocket.readyState == websocket.OPEN) {
+		disconnect();
+	} else {
+		connect();
+	};
+};
+
+function sendMessage() {
+	if (websocket.readyState == websocket.OPEN) {
+		if(loginFlag == true) {
+			var msg = inputDebug.value;
+			console.log("%csend>"+msg, "color: gray;");
+			websocket.send("msg&"+msg);
+			inputDebug.value = ""
+		}
+	} else {
+		console.log("%ccannot send user message, websocket is not connected!", "color: red;");
+	};
+};
+
+function onOpen(evt) {
+	var password = "wololoPassword";
+	console.log("%cTry connect.. password> "+password, "color: gray;");
+	websocket.send("password&"+password)
+};
+
+function onClose(evt) {
+	loginFlag = false
+	statusLine.textContent = "Disconnected.."
+	statusLine.style.color = "red"
+	connectButton.textContent = "Connect"
+	console.log("%cdisconnected!", "color: gray;");
+};
+
+function onMessage(evt) {
+
+	var rx = evt.data
+	console.log("%cgot rx="+rx, "color: green;")
+	if(rx === "password&authorized") {
+		loginFlag = true
+		statusLine.textContent = "Connected"
+		statusLine.style.color = "green"
+		connectButton.textContent = "Disconnect"
+		console.log("%cconnected.", "color: gray;");
+	}
+
+	if(rx === "pong&") {
+		console.log("%cgot pong..", "color: green;");
+		return
+	}
+
+/*
+	console.log("%cgot message>> ", "color: red;");
+	var rxTokens = rx.split("&");
+	if(rxTokens != "") {
+		switch(rxTokens[0]) {
+			case "user_message":
+				rxTokens.shift()
+				if(rxTokens != "") {
+					console.log("Got user message: " + rxTokens)
+					showScreen('<span style="color: black;">' + rxTokens + '</span>');
+				}				
+			break;
+
+			// case "INFO":
+			// 	rxTokens.shift()
+			// 	if(rxTokens != "") {
+			// 		console.log("Got info message: " + rxTokens)
+			// 		showScreen('<span style="color: green;">' + rxTokens + '</span>');
+			// 	}
+			// break;
+		}
+	}*/
+};
+
+function onError(evt) {
+	console.log("%cerror:"+evt.data+"!", "color: red;");
+};
+
+function showScreen(html) {
+	var el = document.createElement("p");
+	el.innerHTML = html;
+	outputBox.insertBefore(el, outputBox.firstChild);
+};
+
+function clearScreen() {
+	outputBox.innerHTML = "";
+};
+
+</script>
+</body>
+</html> 

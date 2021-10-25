@@ -1,5 +1,5 @@
 
--module(mw_server).
+-module(madwallet).
 
 -export([start_link/0, init/1]).
 
