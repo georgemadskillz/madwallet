@@ -5,9 +5,9 @@
 -export([websocket_info/2]).
 -export([terminate/3]).
 
--type connection_state() :: #{
-    authorized := false | true
-}.
+%-type connection_state() :: #{
+%    authorized := false | true
+%}.
 
 -define(DISCONNECT_TIMEOUT, 60000).
 
@@ -15,7 +15,7 @@ init(Req, _State) ->
     io:format("Init websocket [pid=~p]..~n", [self()]),
     {cowboy_websocket, Req, #{authorized => false}, #{idle_timeout => ?DISCONNECT_TIMEOUT}}.
 
-websocket_handle({text,<<"password&", Password/binary>>}, #{authorized := false} = State) ->
+websocket_handle({text, <<"password&", Password/binary>>}, #{authorized := false} = State) ->
     io:format("Websocket [pid=~p]: got connection request with password=~p~n", [self(), Password]),
     case check_password(Password) of
         ok ->
@@ -49,4 +49,3 @@ check_password(<<"wololoPassword">>) ->
     ok;
 check_password(_) ->
     failed.
-

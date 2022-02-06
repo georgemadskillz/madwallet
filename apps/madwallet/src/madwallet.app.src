@@ -1,19 +1,14 @@
-{application, madwallet,
- [{description, "An OTP application"},
-  {vsn, "0.1.0"},
-  {registered, []},
-  {mod, {madwallet_app, []}},
-  {applications,
-   [kernel,
-    stdlib,
-    cowboy
-   ]},
-  {env,[]},
-  {modules,
-    [madwallet_app,
-    madwallet_sup,
-    madwallet_server
+{application, madwallet, [
+    {description, "MadWallet OTP application"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {mod, {madwallet_app, []}},
+    {applications, [
+        kernel,
+        stdlib,
+        cowboy
     ]},
-  {licenses, ["Apache 2.0"]},
-  {links, []}
- ]}.
+    {env, []},
+    {licenses, ["Apache 2.0"]},
+    {links, []}
+]}.
