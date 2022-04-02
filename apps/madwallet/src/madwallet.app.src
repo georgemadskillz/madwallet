@@ -6,7 +6,8 @@
     {applications, [
         kernel,
         stdlib,
-        cowboy
+        cowboy,
+        gun
     ]},
     {env, []},
     {licenses, ["Apache 2.0"]},

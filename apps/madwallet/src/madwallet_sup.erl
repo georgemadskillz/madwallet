@@ -12,7 +12,7 @@ start_link() ->
 
 -spec init([]) -> {ok, {supervisor:sup_flags(), [supervisor:child_spec()]}}.
 init([]) ->
-    SupFlags = {one_for_one, 0, 1},
+    SupFlags = {one_for_one, 1, 1},
     Childs = [
         {
             mw_server,
