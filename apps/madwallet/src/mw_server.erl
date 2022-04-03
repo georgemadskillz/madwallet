@@ -15,6 +15,8 @@
 
 -export([create_user/1]).
 -export([get_users/0]).
+-export([create_wallet/3]).
+-export([get_wallets/1]).
 
 %% API
 
@@ -35,6 +37,15 @@ create_user(_Name) ->
 
 get_users() ->
     gen_server:call(?MW_SERVER, get_users).
+
+create_wallet(UserName, WalletName, CurrencyName) when
+    is_binary(UserName) and
+    is_binary(WalletName) and
+    is_binary(CurrencyName) ->
+    gen_server:call(?MW_SERVER, {create_wallet, {UserName, WalletName, CurrencyName}}).
+
+get_wallets(UserName) ->
+    gen_server:call(?MW_SERVER, {get_wallets, UserName}).
 
 %% Callbacks
 
@@ -82,26 +93,53 @@ init_core() ->
 handle_call(ping, _From, State) ->
     {reply, pong, State};
 handle_call({create_user, Args}, _From, State) ->
-    Name = Args,
+    UserName = Args,
     UsersList0 = maps:get(users_list, State),
-    case lists:member(Name, UsersList0) of
+    case lists:member(UserName, UsersList0) of
         false ->
             NewUser = #{
-                name => Name,
-                wallets => []
+                name => UserName,
+                wallets => #{}
             },
-            {ok, Name} = dets:open_file(Name, {file, "database/" ++ binary_to_list(Name)}),
-            true = dets:insert_new(Name, {user, NewUser}),
-            UsersList1 = [Name|UsersList0],
+            {ok, UserName} = dets:open_file(UserName, {file, "database/" ++ binary_to_list(UserName)}),
+            true = dets:insert_new(UserName, {user, NewUser}),
+            UsersList1 = [UserName|UsersList0],
             ok = dets:insert(db_core, {users_list, UsersList1}),
-            {reply, {ok, Name}, State#{users_list := UsersList1}};
+            {reply, {ok, UserName}, State#{users_list := UsersList1}};
         true ->
             {reply, {error, user_exists}, State}
     end;
 handle_call(get_users, _From, State) ->
     {ok, db_core} = dets:open_file(db_core, {file, "database/db_core"}),
     [{users_list, Users}] = dets:lookup(db_core, users_list),
-    {reply, {ok, Users}, State}.
+    {reply, {ok, Users}, State};
+handle_call({create_wallet, Args}, _From, State) ->
+    UsersList = maps:get(users_list, State),
+    {UserName, WalletName, CurrencyName} = Args,
+    case lists:member(UserName, UsersList) of
+        false ->
+            {reply, {error, user_not_found}, State};
+        true ->
+            {ok, UserName} = dets:open_file(UserName, {file, "database/" ++ binary_to_list(UserName)}),
+            [{user, User0}] = dets:lookup(UserName, user),
+            % TODO: check if wallet exists yet
+            #{wallets := Wallets} = User0,
+            NewWallet = #{
+                name => WalletName,
+                currency => CurrencyName,
+                balance => 0
+            },
+            User1 = User0#{wallets := Wallets#{WalletName => NewWallet}},
+            ok = dets:insert(UserName, {user, User1}),
+            {reply, {ok, NewWallet}, State}
+    end;
+handle_call({get_wallets, Args}, _From, State) ->
+    UserName = Args,
+    % TODO: user not found
+    {ok, UserName} = dets:open_file(UserName, {file, "database/" ++ binary_to_list(UserName)}),
+    [{user, User}] = dets:lookup(UserName, user),
+    #{wallets := Wallets} = User,
+    {reply, {ok, {wallets, Wallets}}, State}.
 
 handle_cast(stop, State) ->
     {stop, normal, State}.
