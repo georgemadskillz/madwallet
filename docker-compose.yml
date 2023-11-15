@@ -1,0 +1,22 @@
+version: "3.3"
+
+services:
+  madwallet:
+    container_name: "madwallet"
+    image: madwallet:${MADWALLET_VERSION}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "554:554"
+    volumes:
+      - "/mnt/data:/mnt/data"
+    env_file:
+      - .env
+    networks:
+      - madwallet_network
+    restart: unless-stopped
+
+networks:
+  madwallet_network:
+    driver: bridge

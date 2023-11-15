@@ -24,7 +24,7 @@ start_link() ->
 %% Callbacks
 
 init(_Args) ->
-    io:format("madwallet> Started.~n", []),
+    io:format("Madwalet Started.~n", []),
     {ok, []}.
 
 terminate(_Reason, _State) ->
